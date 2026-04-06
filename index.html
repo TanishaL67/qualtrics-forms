@@ -101,7 +101,7 @@
     <div class="card">
       <div class="card-title">Generate a link</div>
       <div class="field">
-        <label>Resident name</label>
+        <label>Name</label>
         <input type="text" id="single-name" placeholder="e.g. Dr. Sarah Johnson" oninput="updateSingle()" />
         <div class="hint">This fills in: <span class="tag">Thank you for evaluating [name]</span></div>
       </div>
@@ -119,7 +119,7 @@
     <div class="card">
       <div class="card-title">Bulk generate</div>
       <div class="field">
-        <label>Resident names — one per line</label>
+        <label>Names — one per line</label>
         <textarea id="bulk-names" placeholder="Dr. Sarah Johnson&#10;Dr. Michael Lee&#10;Dr. Priya Patel" oninput="generateBulk()"></textarea>
         <div class="hint">Include the "Dr." prefix if that's how names should appear on the form</div>
       </div>
@@ -146,7 +146,7 @@
       <div class="preview-body">
         <div class="q-header">
           <div class="q-title-block">
-            <h2>Mentor-in-Training Feedback</h2>
+            <h2>Feedback Form</h2>
             <p>Thank you for evaluating <strong id="preview-name-tag">—</strong>.</p>
           </div>
           <div class="q-logo-text">Powered by Qualtrics</div>
