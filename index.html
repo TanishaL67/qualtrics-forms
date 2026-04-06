@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qualtrics Link Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f6f3;
+      --surface: #ffffff;
+      --border: #e4e2dc;
+      --border-strong: #ccc9bf;
+      --text: #1a1a18;
+      --text-muted: #6b6b62;
+      --text-faint: #9e9d94;
+      --accent: #2563eb;
+      --accent-light: #eff4ff;
+      --accent-border: #bfcffd;
+      --success: #16a34a;
+      --success-light: #f0fdf4;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--accent);
+      background: white;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .field { margin-bottom: 1rem; }
+    .field:last-child { margin-bottom: 0; }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+
+    .tab-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 1.25rem;
+    }
+
+    .tab {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.12s;
+    }
+
+    .tab.active {
+      background: var(--text);
+      color: white;
+      border-color: var(--text);
+    }
+
+    .tab:hover:not(.active) {
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+
+    .btn {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text);
+      transition: all 0.12s;
+      white-space: nowrap;
+    }
+
+    .btn:hover { background: var(--bg); border-color: var(--border-strong); }
+    .btn:active { transform: scale(0.98); }
+    .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+    .btn.primary:hover { background: #1d4ed8; }
+    .btn.success { background: var(--success-light); color: var(--success); border-color: #bbf7d0; }
+    .btn.full { width: 100%; }
+
+    .url-preview {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      background: var(--accent-light);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      word-break: break-all;
+      line-height: 1.6;
+      min-height: 40px;
+    }
+
+    .url-preview.empty { color: var(--text-faint); background: var(--bg); border-color: var(--border); font-style: italic; }
+
+    .single-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+    .link-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      margin-bottom: 8px;
+    }
+
+    .link-row:last-child { margin-bottom: 0; }
+
+    .link-info .name { font-size: 14px; font-weight: 500; color: var(--text); }
+    .link-info .url { font-size: 11px; font-family: var(--mono); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 340px; }
+
+    .bulk-list { max-height: 340px; overflow-y: auto; margin-bottom: 10px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-faint);
+      font-size: 13px;
+    }
+
+    .preview-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .preview-browser-bar {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+    .dot.r { background: #fca5a5; }
+    .dot.y { background: #fde68a; }
+    .dot.g { background: #a7f3d0; }
+
+    .preview-url-bar {
+      flex: 1;
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 4px 8px;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .preview-body {
+      background: white;
+      padding: 1.5rem;
+    }
+
+    .qualtrics-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .q-logo {
+      width: 28px; height: 28px;
+      background: #0070c0;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 13px; font-weight: 500;
+    }
+
+    .q-org { font-size: 13px; font-weight: 500; }
+    .q-powered { font-size: 11px; color: var(--text-faint); }
+
+    .form-title { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+    .form-for { font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem; }
+    .form-for strong { color: var(--text); }
+
+    .mock-field { margin-bottom: 12px; }
+    .mock-label { font-size: 13px; font-weight: 500; margin-bottom: 5px; color: var(--text); }
+    .mock-input { height: 34px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
+    .mock-textarea { height: 60px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
+    .mock-btn { height: 34px; width: 90px; background: #0070c0; border-radius: 6px; }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+    .count-badge {
+      display: inline-block;
+      font-size: 11px;
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      border-radius: 99px;
+      padding: 1px 8px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1>Qualtrics link generator</h1>
+    <p>Generate personalized survey links with a recipient name embedded in the URL.</p>
+  </header>
+
+  <!-- Config -->
+  <div class="card">
+    <div class="card-title">Survey configuration</div>
+    <div class="row">
+      <div class="field">
+        <label>Base survey URL</label>
+        <input type="text" id="base-url" placeholder="https://yourorg.qualtrics.com/jfe/form/SV_xxxxxx" oninput="onConfigChange()" />
+      </div>
+      <div class="field">
+        <label>URL parameter name</label>
+        <input type="text" id="param-name" value="name" placeholder="name" style="max-width: 180px;" oninput="onConfigChange()" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-row">
+    <button class="tab active" onclick="switchTab('single')">Single link</button>
+    <button class="tab" onclick="switchTab('bulk')">Bulk generate</button>
+  </div>
+
+  <!-- Single panel -->
+  <div id="single-panel">
+    <div class="card">
+      <div class="card-title">Generate a link</div>
+      <div class="field">
+        <label>Recipient name</label>
+        <input type="text" id="single-name" placeholder="e.g. Sarah Johnson" oninput="updateSingle()" />
+      </div>
+      <div class="field">
+        <label>Generated link</label>
+        <div class="url-preview empty" id="single-url-preview">Enter a name above to generate a link</div>
+      </div>
+      <div class="single-actions">
+        <button class="btn primary" onclick="copySingleLink()" id="copy-single-btn">Copy link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk panel -->
+  <div id="bulk-panel" style="display: none;">
+    <div class="card">
+      <div class="card-title">Bulk generate</div>
+      <div class="field">
+        <label>Names — one per line</label>
+        <textarea id="bulk-names" placeholder="Sarah Johnson&#10;Michael Lee&#10;Priya Patel&#10;James Okafor" oninput="generateBulk()"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Generated links
+        <span class="count-badge" id="link-count" style="display:none">0</span>
+      </div>
+      <div class="bulk-list" id="bulk-results">
+        <div class="empty-state">Paste names above to generate links</div>
+      </div>
+      <button class="btn full" id="export-btn" onclick="exportCSV()" style="display: none; margin-top: 10px;">Export all as CSV</button>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="card">
+    <div class="card-title">Form preview</div>
+    <div class="field row" style="margin-bottom: 1rem;">
+      <div>
+        <label>Form title</label>
+        <input type="text" id="form-title-input" value="Performance feedback" oninput="updatePreview()" />
+      </div>
+      <div>
+        <label>Organisation name</label>
+        <input type="text" id="org-name-input" value="Acme Corp" oninput="updatePreview()" />
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-browser-bar">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        <div class="preview-url-bar" id="preview-url-bar">—</div>
+      </div>
+      <div class="preview-body">
+        <div class="qualtrics-header">
+          <div class="q-logo">Q</div>
+          <div>
+            <div class="q-org" id="preview-org">Acme Corp</div>
+            <div class="q-powered">Powered by Qualtrics</div>
+          </div>
+        </div>
+        <div class="form-title" id="preview-form-title">Performance feedback</div>
+        <div class="form-for">Feedback for <strong id="preview-name-tag">—</strong></div>
+        <div class="mock-field">
+          <div class="mock-label">Overall rating</div>
+          <div class="mock-input"></div>
+        </div>
+        <div class="mock-field">
+          <div class="mock-label">What went well?</div>
+          <div class="mock-textarea"></div>
+        </div>
+        <div class="mock-field">
+          <div class="mock-label">Areas for improvement</div>
+          <div class="mock-textarea"></div>
+        </div>
+        <div class="mock-btn"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let bulkLinks = [];
+
+  function getBase() { return document.getElementById('base-url').value.trim(); }
+  function getParam() { return document.getElementById('param-name').value.trim() || 'name'; }
+
+  function buildLink(name) {
+    const base = getBase();
+    if (!base || !name) return '';
+    const sep = base.includes('?') ? '&' : '?';
+    return base + sep + encodeURIComponent(getParam()) + '=' + encodeURIComponent(name);
+  }
+
+  function onConfigChange() { updateSingle(); generateBulk(); }
+
+  function updateSingle() {
+    const name = document.getElementById('single-name').value.trim();
+    const link = buildLink(name);
+    const el = document.getElementById('single-url-preview');
+    if (link) { el.textContent = link; el.classList.remove('empty'); }
+    else { el.textContent = 'Enter a name above to generate a link'; el.classList.add('empty'); }
+    updatePreviewFor(name, link);
+  }
+
+  function updatePreviewFor(name, link) {
+    document.getElementById('preview-name-tag').textContent = name || '—';
+    document.getElementById('preview-url-bar').textContent = link || '—';
+    updatePreview();
+  }
+
+  function updatePreview() {
+    document.getElementById('preview-form-title').textContent = document.getElementById('form-title-input').value || 'Feedback form';
+    document.getElementById('preview-org').textContent = document.getElementById('org-name-input').value || 'Your organisation';
+  }
+
+  function copySingleLink() {
+    const link = buildLink(document.getElementById('single-name').value.trim());
+    if (!link) return;
+    navigator.clipboard.writeText(link).then(() => {
+      const btn = document.getElementById('copy-single-btn');
+      btn.textContent = 'Copied!';
+      btn.classList.remove('primary'); btn.classList.add('success');
+      setTimeout(() => { btn.textContent = 'Copy link'; btn.classList.add('primary'); btn.classList.remove('success'); }, 1800);
+    });
+  }
+
+  function generateBulk() {
+    const raw = document.getElementById('bulk-names').value;
+    const names = raw.split('\n').map(n => n.trim()).filter(Boolean);
+    bulkLinks = names.map(name => ({ name, url: buildLink(name) }));
+
+    const container = document.getElementById('bulk-results');
+    const badge = document.getElementById('link-count');
+    const exportBtn = document.getElementById('export-btn');
+
+    if (!names.length) {
+      container.innerHTML = '<div class="empty-state">Paste names above to generate links</div>';
+      badge.style.display = 'none';
+      exportBtn.style.display = 'none';
+      return;
+    }
+
+    badge.textContent = names.length;
+    badge.style.display = 'inline-block';
+    exportBtn.style.display = getBase() ? 'block' : 'none';
+
+    container.innerHTML = bulkLinks.map((item, i) => `
+      <div class="link-row">
+        <div class="link-info">
+          <div class="name">${escHtml(item.name)}</div>
+          <div class="url">${escHtml(item.url || '(set base URL first)')}</div>
+        </div>
+        <button class="btn" id="copy-bulk-${i}" onclick="copyBulkLink(${i})">Copy</button>
+        <button class="btn" onclick="previewBulkName('${escJs(item.name)}', '${escJs(item.url)}')">Preview</button>
+      </div>
+    `).join('');
+  }
+
+  function copyBulkLink(i) {
+    if (!bulkLinks[i] || !bulkLinks[i].url) return;
+    navigator.clipboard.writeText(bulkLinks[i].url).then(() => {
+      const btn = document.getElementById('copy-bulk-' + i);
+      btn.textContent = 'Copied!';
+      btn.classList.add('success');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('success'); }, 1800);
+    });
+  }
+
+  function previewBulkName(name, url) {
+    switchTab('single');
+    document.getElementById('single-name').value = name;
+    updateSingle();
+    updatePreviewFor(name, url);
+    document.querySelector('.preview-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function exportCSV() {
+    const rows = [['Name', 'Link'], ...bulkLinks.map(r => [r.name, r.url])];
+    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'qualtrics_links.csv';
+    a.click();
+  }
+
+  function switchTab(tab) {
+    document.getElementById('single-panel').style.display = tab === 'single' ? '' : 'none';
+    document.getElementById('bulk-panel').style.display = tab === 'bulk' ? '' : 'none';
+    document.querySelectorAll('.tab').forEach((el, i) => {
+      el.classList.toggle('active', (i === 0 && tab === 'single') || (i === 1 && tab === 'bulk'));
+    });
+  }
+
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function escJs(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+</script>
+</body>
+</html>
